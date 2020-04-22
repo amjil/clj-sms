@@ -1,7 +1,7 @@
 (ns clj-sms.db.core
   (:require
     [mount.core :refer [defstate]]
-    [clj-redis.client :as redis]))
+    [clj-sms.util.redis :as redis]))
 
 (defstate rdb
   :start

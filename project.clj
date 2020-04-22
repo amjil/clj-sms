@@ -5,7 +5,6 @@
 
   :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
                  [cheshire "5.10.0"]
-                 [clj-redis "0.0.12" :exclusions [redis.clients/jedis org.clojure/clojure]]
                  [clojure.java-time "0.3.2"]
                  [com.cerner/clara-rules "0.20.0"]
                  [cprop "0.1.16"]
