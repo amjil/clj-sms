@@ -10,7 +10,11 @@
     [clj-sms.middleware.formats :as formats]
     [clj-sms.middleware.exception :as exception]
     [ring.util.http-response :refer :all]
-    [clojure.java.io :as io]))
+    [clojure.java.io :as io]
+
+    [clj-sms.services.sms-db-send :as sms-send]
+    [clj-sms.services.sms-db-check :as sms-check]
+    [clj-sms.services.query :as rule-query]))
 
 (defn service-routes []
   ["/api"
@@ -49,43 +53,29 @@
 
    ["/ping"
     {:get (constantly (ok {:message "pong"}))}]
-   
 
-   ["/math"
-    {:swagger {:tags ["math"]}}
-
-    ["/plus"
-     {:get {:summary "plus with spec query parameters"
-            :parameters {:query {:x int?, :y int?}}
-            :responses {200 {:body {:total pos-int?}}}
-            :handler (fn [{{{:keys [x y]} :query} :parameters}]
+   ["/send"
+    {:post {:summary "check user sms."
+            :parameters {:body {:phone string?}}
+            :responses {200 {:body {:success boolean? :msg string?, :errors #{string?}}}}
+            :handler (fn [{{{:keys [phone sms]} :body} :parameters}]
                        {:status 200
-                        :body {:total (+ x y)}})}
-      :post {:summary "plus with spec body parameters"
-             :parameters {:body {:x int?, :y int?}}
-             :responses {200 {:body {:total pos-int?}}}
-             :handler (fn [{{{:keys [x y]} :body} :parameters}]
-                        {:status 200
-                         :body {:total (+ x y)}})}}]]
+                        :body
+                        (let [rule-session (sms-send/run-rules phone)
+                              errors (map :value (rule-query/get-errors rule-session))]
+                          (if (empty? errors)
+                            {:success true :msg "success"}
+                            {:success false :msg "failed" :errors errors}))})}}]
 
-   ["/files"
-    {:swagger {:tags ["files"]}}
-
-    ["/upload"
-     {:post {:summary "upload a file"
-             :parameters {:multipart {:file multipart/temp-file-part}}
-             :responses {200 {:body {:name string?, :size int?}}}
-             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
-                        {:status 200
-                         :body {:name (:filename file)
-                                :size (:size file)}})}}]
-
-    ["/download"
-     {:get {:summary "downloads a file"
-            :swagger {:produces ["image/png"]}
-            :handler (fn [_]
+   ["/check"
+    {:post {:summary "check user sms."
+            :parameters {:body {:phone string?}}
+            :responses {200 {:body {:success boolean? :msg string?, :errors #{string?}}}}
+            :handler (fn [{{{:keys [phone sms]} :body} :parameters}]
                        {:status 200
-                        :headers {"Content-Type" "image/png"}
-                        :body (-> "public/img/warning_clojure.png"
-                                  (io/resource)
-                                  (io/input-stream))})}}]]])
+                        :body
+                        (let [rule-session (sms-check/run-rules phone)
+                              errors (map :value (rule-query/get-errors rule-session))]
+                          (if (empty? errors)
+                            {:success true :msg "success"}
+                            {:success false :msg "failed" :errors errors}))})}}]])

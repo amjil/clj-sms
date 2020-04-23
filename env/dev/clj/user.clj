@@ -8,7 +8,6 @@
    [mount.core :as mount]
    [clj-sms.core :refer [start-app]]
    [clj-sms.db.core]
-   [conman.core :as conman]
    [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
@@ -31,9 +30,7 @@
   "Restarts database."
   []
   (mount/stop #'clj-sms.db.core/*db*)
-  (mount/start #'clj-sms.db.core/*db*)
-  (binding [*ns* 'clj-sms.db.core]
-    (conman/bind-connection clj-sms.db.core/*db* "sql/queries.sql")))
+  (mount/start #'clj-sms.db.core/*db*))
 
 (defn reset-db
   "Resets database."

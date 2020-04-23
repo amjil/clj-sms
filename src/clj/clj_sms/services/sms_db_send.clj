@@ -1,4 +1,4 @@
-(ns clj-sms.services.sms-db-rule
+(ns clj-sms.services.sms-db-send
   (:require
     [clara.rules :refer [defrule defquery mk-session query insert insert! fire-rules]]
     [clara.rules.accumulators :as acc]
@@ -7,15 +7,15 @@
     [clj-sms.db.models :as models]
     [java-time :as time]
     [clojure.tools.logging :as log]
-    [clj-sms.config :refer [env]]))
+    [clj-sms.config :refer [env]]
+    [clj-sms.services.generate-code :as generate-code]
+    [clj-sms.services.query :as rule-query]))
 
 (defrecord Minutely [count])
 
 (defrecord Hourly [count])
 
 (defrecord Daily [count])
-
-(defrecord Result [status msg])
 
 (defrecord Record [id value])
 
@@ -46,39 +46,33 @@
   [Minutely (>= count (-> env :sms-check :minute))]
   =>
   (log/warn "check-minutely")
-  (insert! (->Result false 'minute)))
+  (insert! (rule-query/->Result false 'minute)))
 
 (defrule check-hourly
   [Hourly (>= count (-> env :sms-check :hour))]
   =>
   (log/warn "check-hourly")
-  (insert! (->Result false 'hour)))
+  (insert! (rule-query/->Result false 'hour)))
 
 (defrule check-daily
   [Daily (>= count (-> env :sms-check :day))]
   =>
   (log/warn "check-daily")
-  (insert! (->Result false 'day)))
+  (insert! (rule-query/->Result false 'day)))
 
 (defrule update-stores
   [Record (= ?id id) (= ?value value)]
   [Daily (= ?dcount count)]
   [Hourly (= ?hcount count)]
   [Minutely (= ?mcount count)]
-  [?errors <- (acc/all) :from [Result (= false status)]]
+  ; [?errors <- (acc/all) :from [Result (= false status)]]
   [:test (and (< ?dcount (-> env :sms-check :day))
               (< ?hcount (-> env :sms-check :hour))
               (< ?mcount (-> env :sms-check :minute)))]
   =>
   (db/insert! models/Sms :phone ?id, :sms ?value))
 
-(defquery get-errors
-  [:?status]
-  [?errors <- Result (= ?status status)])
-
-(query session sms-db/get-errors :?status false)
-
-(defn run-rules []
-  (-> (mk-session 'clj-sms.services.sms-db-rule)
-      (insert (->Record "15248141905" "123456"))
+(defn run-rules [phone]
+  (-> (mk-session 'clj-sms.services.sms-db-send)
+      (insert (->Record phone (generate-code/generate)))
       (fire-rules)))

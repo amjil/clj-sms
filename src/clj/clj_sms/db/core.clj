@@ -56,14 +56,16 @@
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
-           (connect! {:jdbc-url jdbc-url
-                      :maximum-pool-size 2})
+           (let [conn
+                 (connect! {:jdbc-url jdbc-url
+                            :maximum-pool-size 2})]
+             (db/set-default-db-connection! {:datasource conn})
+             conn)
            (do
              (log/warn "database connection URL was not found, please set :database-url in your config, e.g: dev-config.edn")
              *db*))
   :stop (disconnect! *db*))
 
-(db/set-default-db-connection! {:datasource *db*})
 
 (add-type! :json
   :in  generate-string
