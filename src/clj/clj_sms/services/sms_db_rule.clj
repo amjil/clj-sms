@@ -1,12 +1,13 @@
 (ns clj-sms.services.sms-db-rule
   (:require
-    [clara.rules :refer [defrule mk-session insert insert! fire-rules]]
+    [clara.rules :refer [defrule defquery mk-session query insert insert! fire-rules]]
     [clara.rules.accumulators :as acc]
     [toucan.db :as db]
     [honeysql.core :as sql]
     [clj-sms.db.models :as models]
     [java-time :as time]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [clj-sms.config :refer [env]]))
 
 (defrecord Minutely [count])
 
@@ -26,7 +27,7 @@
         data (->> (db/select models/Sms :phone ?id :created_at [:> date])
                   (map #(assoc % :created_at (time/local-date-time (:created_at %)))))
 
-        mtime (time/minus (time/local-date-time) (time/minutes 2))
+        mtime (time/minus (time/local-date-time) (time/minutes (-> env :sms-check :minute-scale)))
         mdata (filter #(time/before? mtime (:created_at %)) data)
 
         htime (time/minus (time/local-date-time) (time/hours 1))
@@ -42,21 +43,21 @@
   (log/warn  "get-records ....... ended"))
 
 (defrule check-minutely
-  [Minutely (>= count 1)]
+  [Minutely (>= count (-> env :sms-check :minute))]
   =>
-  (prn "22222")
+  (log/warn "check-minutely")
   (insert! (->Result false 'minute)))
 
 (defrule check-hourly
-  [Hourly (>= count 5)]
+  [Hourly (>= count (-> env :sms-check :hour))]
   =>
-  (prn "3333")
+  (log/warn "check-hourly")
   (insert! (->Result false 'hour)))
 
 (defrule check-daily
-  [Daily (>= count 10)]
+  [Daily (>= count (-> env :sms-check :day))]
   =>
-  (prn "4444")
+  (log/warn "check-daily")
   (insert! (->Result false 'day)))
 
 (defrule update-stores
@@ -65,12 +66,17 @@
   [Hourly (= ?hcount count)]
   [Minutely (= ?mcount count)]
   [?errors <- (acc/all) :from [Result (= false status)]]
-  [:test (and (< ?dcount 10) (< ?hcount 5) (< ?mcount 1))]
+  [:test (and (< ?dcount (-> env :sms-check :day))
+              (< ?hcount (-> env :sms-check :hour))
+              (< ?mcount (-> env :sms-check :minute)))]
   =>
-  (prn ?id)
-  (prn ?errors)
-  (prn "xxxxxxx")
   (db/insert! models/Sms :phone ?id, :sms ?value))
+
+(defquery get-errors
+  [:?status]
+  [?errors <- Result (= ?status status)])
+
+(query session sms-db/get-errors :?status false)
 
 (defn run-rules []
   (-> (mk-session 'clj-sms.services.sms-db-rule)
