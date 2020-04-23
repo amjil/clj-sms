@@ -8,8 +8,7 @@
     [java-time :as time]
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
-    [clj-sms.services.generate-code :as generate-code]
-    [clj-sms.services.query :as rule-query]))
+    [clj-sms.services.generate-code :as generate-code]))
 
 (defrecord Minutely [count])
 
@@ -18,6 +17,8 @@
 (defrecord Daily [count])
 
 (defrecord Record [id value])
+
+(defrecord Result [status msg])
 
 (defrule get-records
   [Record (= ?id id)]
@@ -46,19 +47,19 @@
   [Minutely (>= count (-> env :sms-check :minute))]
   =>
   (log/warn "check-minutely")
-  (insert! (rule-query/->Result false 'minute)))
+  (insert! (->Result false 'minute)))
 
 (defrule check-hourly
   [Hourly (>= count (-> env :sms-check :hour))]
   =>
   (log/warn "check-hourly")
-  (insert! (rule-query/->Result false 'hour)))
+  (insert! (->Result false 'hour)))
 
 (defrule check-daily
   [Daily (>= count (-> env :sms-check :day))]
   =>
   (log/warn "check-daily")
-  (insert! (rule-query/->Result false 'day)))
+  (insert! (->Result false 'day)))
 
 (defrule update-stores
   [Record (= ?id id) (= ?value value)]
@@ -71,6 +72,13 @@
               (< ?mcount (-> env :sms-check :minute)))]
   =>
   (db/insert! models/Sms :phone ?id, :sms ?value))
+
+(defquery query-errors
+  [:?status]
+  [?errors <- Result (= ?status status)])
+
+(defn run-query [session]
+  (query session query-errors :?status false))
 
 (defn run-rules [phone]
   (-> (mk-session 'clj-sms.services.sms-db-send)

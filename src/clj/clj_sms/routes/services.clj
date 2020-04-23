@@ -11,10 +11,10 @@
     [clj-sms.middleware.exception :as exception]
     [ring.util.http-response :refer :all]
     [clojure.java.io :as io]
+    [spec-tools.data-spec :as ds]
 
     [clj-sms.services.sms-db-send :as sms-send]
-    [clj-sms.services.sms-db-check :as sms-check]
-    [clj-sms.services.query :as rule-query]))
+    [clj-sms.services.sms-db-check :as sms-check]))
 
 (defn service-routes []
   ["/api"
@@ -57,25 +57,25 @@
    ["/send"
     {:post {:summary "check user sms."
             :parameters {:body {:phone string?}}
-            :responses {200 {:body {:success boolean? :msg string?, :errors #{string?}}}}
+            :responses {200 {:body {:success boolean? :msg string?, (ds/opt :errors) any?}}}
             :handler (fn [{{{:keys [phone sms]} :body} :parameters}]
                        {:status 200
                         :body
                         (let [rule-session (sms-send/run-rules phone)
-                              errors (map :value (rule-query/get-errors rule-session))]
+                              errors (map #(-> % :?errors :msg) (sms-send/run-query rule-session))]
                           (if (empty? errors)
                             {:success true :msg "success"}
                             {:success false :msg "failed" :errors errors}))})}}]
 
    ["/check"
     {:post {:summary "check user sms."
-            :parameters {:body {:phone string?}}
-            :responses {200 {:body {:success boolean? :msg string?, :errors #{string?}}}}
-            :handler (fn [{{{:keys [phone sms]} :body} :parameters}]
+            :parameters {:body {:phone string? :value string?}}
+            :responses {200 {:body {:success boolean? :msg string?, (ds/opt :errors) any?}}}
+            :handler (fn [{{{:keys [phone value]} :body} :parameters}]
                        {:status 200
                         :body
-                        (let [rule-session (sms-check/run-rules phone)
-                              errors (map :value (rule-query/get-errors rule-session))]
+                        (let [rule-session (sms-check/run-rules phone value)
+                              errors (map #(-> % :?errors :msg) (sms-check/run-query rule-session))]
                           (if (empty? errors)
                             {:success true :msg "success"}
                             {:success false :msg "failed" :errors errors}))})}}]])
