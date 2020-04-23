@@ -1,4 +1,4 @@
-(ns clj-sms.services.core
+(ns clj-sms.services.sms-redis-rule
   (:require
     [clara.rules :refer [defrule mk-session insert insert! fire-rules]]
     [clara.rules.accumulators :as acc]
@@ -50,7 +50,7 @@
 (defrule update-stores
   [Phone (= ?id id)]
   [?errors <- (acc/all) :from [Result (= false status)]]
-  [:test (< (count ?errors) 0)]
+  [:test (= (count ?errors) 0)]
   =>
   (prn "5555")
   (prn ?errors)
@@ -64,6 +64,6 @@
   (redis/expire rdb (str ?id "d") (* 60 60 24)))
 
 (defn run-rules []
-  (-> (mk-session 'clj-sms.services.core)
+  (-> (mk-session 'clj-sms.services.sms-redis-rule)
       (insert (->Phone "15248141905"))
       (fire-rules)))
