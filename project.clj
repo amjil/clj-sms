@@ -6,11 +6,12 @@
   :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
                  [cheshire "5.10.0"]
                  [clojure.java-time "0.3.2"]
+                 [com.carouselapps/to-jdbc-uri "0.5.0"]
                  [com.cerner/clara-rules "0.20.0"]
-                 [conman "0.8.6"]
                  [cprop "0.1.16"]
                  [expound "0.8.4"]
                  [funcool/struct "1.4.0"]
+                 [hikari-cp "2.11.0"]
                  [luminus-http-kit "0.1.6"]
                  [luminus-migrations "0.6.7"]
                  [luminus-transit "0.1.2"]
@@ -35,7 +36,7 @@
   :target-path "target/%s/"
   :main ^:skip-aot clj-sms.core
 
-  :plugins []
+  :plugins [[lein-ancient "0.6.15"]]
 
   :profiles
   {:uberjar {:omit-source true
