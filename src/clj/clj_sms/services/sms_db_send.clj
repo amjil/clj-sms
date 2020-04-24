@@ -9,7 +9,8 @@
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
     [clj-sms.services.generate-code :as generate-code]
-    [clj-sms.services.sendapi :as sendapi]))
+    [clj-sms.services.sendapi :as sendapi]
+    [promesa.exec :as exec]))
 
 (defrecord Minutely [count])
 
@@ -26,7 +27,7 @@
   =>
   (log/warn  "get-records ....... started")
   (let [date (time/local-date)
-        data (->> (db/select models/Sms :phone ?id :created_at [:> date])
+        data (->> (db/select models/Sms :phone :status 0 ?id :created_at [:> date])
                   (map #(assoc % :created_at (time/local-date-time (:created_at %)))))
 
         mtime (time/minus (time/local-date-time) (time/minutes (-> env :sms-check :minute-scale)))
@@ -72,9 +73,11 @@
               (< ?hcount (-> env :sms-check :hour))
               (< ?mcount (-> env :sms-check :minute)))]
   =>
-  (db/insert! models/Sms :phone ?id, :sms ?value)
   ; send sms
-  (sendapi/sendsms {:phone ?id :code ?value}))
+  (sendapi/sendsms {:phone ?id :code ?value})
+
+  (exec/schedule! 100 
+    #(db/insert! models/Sms :phone ?id, :sms ?value)))
 
 (defquery query-errors
   [:?status]
