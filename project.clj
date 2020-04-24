@@ -10,6 +10,7 @@
                  [com.cerner/clara-rules "0.20.0"]
                  [cprop "0.1.16"]
                  [expound "0.8.4"]
+                 [funcool/promesa "5.1.0"]
                  [funcool/struct "1.4.0"]
                  [hikari-cp "2.11.0"]
                  [luminus-http-kit "0.1.6"]
@@ -27,7 +28,11 @@
                  [redis.clients/jedis "3.0.1"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-defaults "0.3.2"]
-                 [toucan "1.15.1"]]
+                 [toucan "1.15.1"]
+                 ;; 阿里大鱼
+                 [com.aliyun/aliyun-java-sdk-core "4.5.1"]
+                 [com.aliyun/aliyun-java-sdk-dysmsapi "2.1.0"]]
+
 
   :min-lein-version "2.0.0"
 

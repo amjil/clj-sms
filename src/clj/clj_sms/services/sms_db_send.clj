@@ -8,7 +8,8 @@
     [java-time :as time]
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
-    [clj-sms.services.generate-code :as generate-code]))
+    [clj-sms.services.generate-code :as generate-code]
+    [clj-sms.services.sendapi :as sendapi]))
 
 (defrecord Minutely [count])
 
@@ -61,7 +62,7 @@
   (log/warn "check-daily")
   (insert! (->Result false 'day)))
 
-(defrule update-stores
+(defrule update-stores-and-send
   [Record (= ?id id) (= ?value value)]
   [Daily (= ?dcount count)]
   [Hourly (= ?hcount count)]
@@ -71,7 +72,9 @@
               (< ?hcount (-> env :sms-check :hour))
               (< ?mcount (-> env :sms-check :minute)))]
   =>
-  (db/insert! models/Sms :phone ?id, :sms ?value))
+  (db/insert! models/Sms :phone ?id, :sms ?value)
+  ; send sms
+  (sendapi/sendsms {:phone ?id :code ?value}))
 
 (defquery query-errors
   [:?status]
