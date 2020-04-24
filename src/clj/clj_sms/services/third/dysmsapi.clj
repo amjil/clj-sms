@@ -1,6 +1,7 @@
 (ns clj-sms.services.third.dysmsapi
   (:require
-    [clojure.tools.logging :as log])
+    [clojure.tools.logging :as log]
+    [clj-sms.env :refer [env]])
   (:import
     [com.aliyuncs CommonRequest
                   CommonResponse
@@ -13,7 +14,8 @@
 
 (defn sendsms [params]
   (log/warn "dysmsapi sendsms ....... startd")
-  (let [profile (DefaultProfile/getProfile "cn-hangzhou"  "LTAI4GH55adzYzFXrYE9CmSC"  "WNXvpxKkfrj0IdyDXYDY8iMTauwdVS")
+  (let [dysms-config (-> env :third-party :dysms)
+        profile (DefaultProfile/getProfile "cn-hangzhou"  (:key dysms-config) (:secret dysms-config))
         client (DefaultAcsClient. profile)
 
         request (doto (CommonRequest.)
@@ -23,8 +25,8 @@
                       (.setSysAction "SendSms")
                       (.putQueryParameter "RegionId" "cn-hangzhou")
                       (.putQueryParameter "PhoneNumbers" (:phone params))
-                      (.putQueryParameter "SignName" "旅游在线")
-                      (.putQueryParameter "TemplateCode" "SMS_189030084")
+                      (.putQueryParameter "SignName" (:sign-name dysms-config))
+                      (.putQueryParameter "TemplateCode" (:sms-template dysms-config))
                       (.putQueryParameter "TemplateCode" (str "{\"code\":\"" (:code params) "\"}")))]
 
     (try
