@@ -28,10 +28,12 @@
   [Record (= ?id id)]
   =>
   (log/warn "check-blocked ...... started")
-  (let [data (first (db/select models/Block :phone ?id :status 1))]
-    (if (empty? data)
-      (insert! (->Block false))
-      (insert! (->Block true))))
+  (if (true? (-> env :sms-check :block-list))
+    (let [data (first (db/select models/Block :phone ?id :status 1))]
+      (if (empty? data)
+        (insert! (->Block false))
+        (insert! (->Block true))))
+    (insert! (->Block false)))
   (log/warn "check-blocked ...... ended"))
 
 (defrule get-records
@@ -88,11 +90,11 @@
               (< ?mcount (-> env :sms-check :minute)))]
   =>
   ; send sms
-  (sendapi/sendsms {:phone ?id :code ?value})
+  (if-not (true? (:dev env))
+    (sendapi/sendsms {:phone ?id :code ?value}))
 
-  (if (true? (:dev env))
-    (exec/schedule! 100
-      #(db/insert! models/Sms :phone ?id, :sms ?value))))
+  (exec/schedule! 100
+    #(db/insert! models/Sms :phone ?id, :sms ?value)))
 
 (defquery query-errors
   [:?status]

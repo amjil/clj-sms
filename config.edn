@@ -7,7 +7,8 @@
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :database-url "postgresql://localhost/clj_sms_dev?user=amjil&password="
 
- :sms-check {:minute-scale 2 :minute 1 :hour 5 :day 10 :valid-time 120}
+ :sms-check {:minute-scale 2 :minute 1 :hour 5 :day 10 :valid-time 120
+             :block-list false}
 
  :third-party {:dysms {:key "xxxxxx" :secret "xxxxxx"
                        :sign-name "阿里云通信" :sms-template "SMS_xxxxxx"}}}
