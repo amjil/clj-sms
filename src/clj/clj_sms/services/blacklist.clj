@@ -9,3 +9,7 @@
   (let [data (first (db/select models/Block :phone phone))]
     (if data
       (db/insert! models/Block :phone phone :reason reason))))
+
+(defn delete-block [phone]
+  (db/update-where! models/Block {:phone phone}
+    :status 0))
