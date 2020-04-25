@@ -5,3 +5,5 @@
 (defmodel Sms :user_sms_log)
   ; (types [this]
   ;   {:status :keyword}))
+
+(defmodel Block :user_black_list)

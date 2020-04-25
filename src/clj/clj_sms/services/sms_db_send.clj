@@ -18,16 +18,29 @@
 
 (defrecord Daily [count])
 
+(defrecord Block [sts])
+
 (defrecord Record [id value])
 
 (defrecord Result [status msg])
 
+(defrule check-blocked
+  [Record (= ?id id)]
+  =>
+  (log/warn "check-blocked ...... started")
+  (let [data (first (db/select models/Block :phone ?id :status 1))]
+    (if (empty? data)
+      (insert! (->Block false))
+      (insert! (->Block true))))
+  (log/warn "check-blocked ...... ended"))
+
 (defrule get-records
   [Record (= ?id id)]
+  [Block (= sts false)]
   =>
   (log/warn  "get-records ....... started")
   (let [date (time/local-date)
-        data (->> (db/select models/Sms :phone :status 0 ?id :created_at [:> date])
+        data (->> (db/select models/Sms :phone ?id :status 0 :created_at [:> date])
                   (map #(assoc % :created_at (time/local-date-time (:created_at %)))))
 
         mtime (time/minus (time/local-date-time) (time/minutes (-> env :sms-check :minute-scale)))
@@ -63,6 +76,7 @@
   (log/warn "check-daily")
   (insert! (->Result false 'day)))
 
+
 (defrule update-stores-and-send
   [Record (= ?id id) (= ?value value)]
   [Daily (= ?dcount count)]
@@ -76,8 +90,9 @@
   ; send sms
   (sendapi/sendsms {:phone ?id :code ?value})
 
-  (exec/schedule! 100 
-    #(db/insert! models/Sms :phone ?id, :sms ?value)))
+  (if (true? (:dev env))
+    (exec/schedule! 100
+      #(db/insert! models/Sms :phone ?id, :sms ?value))))
 
 (defquery query-errors
   [:?status]
