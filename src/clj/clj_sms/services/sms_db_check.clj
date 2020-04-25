@@ -7,7 +7,8 @@
     [clj-sms.db.models :as models]
     [java-time :as time]
     [clojure.tools.logging :as log]
-    [clj-sms.config :refer [env]]))
+    [clj-sms.config :refer [env]]
+    [promesa.exec :as exec]))
 
 (defrecord Record [id value])
 
@@ -31,7 +32,8 @@
   =>
   (if (not= ?value ?user-value)
     (insert! (->Result false 'not_march))
-    (db/update! models/Sms ?id :status 1)))
+    (exec/schedule! 100
+      #(db/update! models/Sms ?id :status 1))))
 
 (defquery query-errors
   [:?status]
