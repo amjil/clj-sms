@@ -56,26 +56,26 @@
 
    ["/send"
     {:post {:summary "check user sms."
-            :parameters {:body {:phone string?}}
-            :responses {200 {:body {:success boolean? :msg string?, (ds/opt :errors) any?}}}
-            :handler (fn [{{{:keys [phone sms]} :body} :parameters}]
+            :parameters {:body {:phone string? (ds/opt :code) string?}}
+            :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
+            :handler (fn [{{{:keys [phone code]} :body} :parameters}]
                        {:status 200
                         :body
-                        (let [rule-session (sms-send/run-rules phone)
+                        (let [rule-session (sms-send/run-rules phone code)
                               errors (map #(-> % :?errors :msg) (sms-send/run-query rule-session))]
                           (if (empty? errors)
-                            {:success true :msg "success"}
-                            {:success false :msg "failed" :errors errors}))})}}]
+                            {:code 0 :msg "success"}
+                            {:code 1 :msg (str (first errors)) :errors errors}))})}}]
 
    ["/check"
     {:post {:summary "check user sms."
             :parameters {:body {:phone string? :value string?}}
-            :responses {200 {:body {:success boolean? :msg string?, (ds/opt :errors) any?}}}
+            :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
             :handler (fn [{{{:keys [phone value]} :body} :parameters}]
                        {:status 200
                         :body
                         (let [rule-session (sms-check/run-rules phone value)
                               errors (map #(-> % :?errors :msg) (sms-check/run-query rule-session))]
                           (if (empty? errors)
-                            {:success true :msg "success"}
-                            {:success false :msg "failed" :errors errors}))})}}]])
+                            {:code 0 :msg "success"}
+                            {:code 1 :msg (str (first errors)) :errors errors}))})}}]])

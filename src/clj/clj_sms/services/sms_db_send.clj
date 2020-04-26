@@ -103,7 +103,7 @@
 (defn run-query [session]
   (query session query-errors :?status false))
 
-(defn run-rules [phone]
+(defn run-rules [phone code]
   (-> (mk-session 'clj-sms.services.sms-db-send)
-      (insert (->Record phone (generate-code/generate)))
+      (insert (->Record phone (if code code (generate-code/generate))))
       (fire-rules)))
