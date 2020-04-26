@@ -10,6 +10,7 @@
                  [com.cerner/clara-rules "0.20.0"]
                  [cprop "0.1.16"]
                  [expound "0.8.4"]
+                 [funcool/cuerdas "2020.03.26-3"]
                  [funcool/promesa "5.1.0"]
                  [funcool/struct "1.4.0"]
                  [hikari-cp "2.11.0"]

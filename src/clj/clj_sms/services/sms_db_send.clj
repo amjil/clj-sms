@@ -10,7 +10,8 @@
     [clj-sms.config :refer [env]]
     [clj-sms.services.generate-code :as generate-code]
     [clj-sms.services.sendapi :as sendapi]
-    [promesa.exec :as exec]))
+    [promesa.exec :as exec]
+    [cuerdas.core :as str]))
 
 (defrecord Minutely [count])
 
@@ -23,6 +24,10 @@
 (defrecord Record [id value])
 
 (defrecord Result [status msg])
+
+(defn- get-format-msg [x y]
+  (let [num-value (-> env :sms-check (get y))]
+    (str/format (-> env :sms-check (get x)) {:num num-value})))
 
 (defrule check-blocked
   [Record (= ?id id)]
@@ -64,19 +69,19 @@
   [Minutely (>= count (-> env :sms-check :minute))]
   =>
   (log/warn "check-minutely")
-  (insert! (->Result false 'minute)))
+  (insert! (->Result false (get-format-msg :minute-check-msg :minute))))
 
 (defrule check-hourly
   [Hourly (>= count (-> env :sms-check :hour))]
   =>
   (log/warn "check-hourly")
-  (insert! (->Result false 'hour)))
+  (insert! (->Result false (get-format-msg :hour-check-msg :hour))))
 
 (defrule check-daily
   [Daily (>= count (-> env :sms-check :day))]
   =>
   (log/warn "check-daily")
-  (insert! (->Result false 'day)))
+  (insert! (->Result false (get-format-msg :day-check-msg :day))))
 
 
 (defrule update-stores-and-send

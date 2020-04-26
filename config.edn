@@ -8,7 +8,12 @@
  :database-url "postgresql://localhost/clj_sms_dev?user=amjil&password="
 
  :sms-check {:minute-scale 2 :minute 1 :hour 5 :day 10 :valid-time 120
-             :block-list false}
+             :block-list false
+             :no-record-msg "短信验证码不匹配"
+             :not-match-msg "短信验证码不匹配"
+             :minute-check-msg "两分钟内只能发送~(-> env :sms-check :minute)条短信"
+             :hour-check-msg "一个小时内只能发送~(-> env :sms-check :hour)条短信"
+             :day-check-msg "一天内只能发送~(-> env :sms-check :day)条短信"}
 
  :third-party {:dysms {:key "xxxxxx" :secret "xxxxxx"
                        :sign-name "阿里云通信" :sms-template "SMS_xxxxxx"}}}

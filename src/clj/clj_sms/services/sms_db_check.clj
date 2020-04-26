@@ -8,7 +8,8 @@
     [java-time :as time]
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
-    [promesa.exec :as exec]))
+    [promesa.exec :as exec]
+    [cuerdas.core :as str]))
 
 (defrecord Record [id value])
 
@@ -16,13 +17,16 @@
 
 (defrecord Result [status msg])
 
+(defn- get-config [id]
+  (-> env :sms-check (get id)))
+
 (defrule get-record
   [Record (= ?id id)]
   =>
   (let [date (time/minus (time/local-date-time) (time/seconds (-> env :sms-check :valid-time)))
         data (first (db/select models/Sms :phone ?id, :status 0, :created_at [:> date], {:limit 1 :order-by [[:created_at :desc]]}))]
     (if (empty? data)
-      (insert! (->Result false 'no_record))
+      (insert! (->Result false (get-config :no-record-msg)))
       (insert! (->Sms (-> data :id) (-> data :sms))))))
 
 (defrule check
@@ -31,7 +35,7 @@
   ; [:test (not= ?value ?user-value)]
   =>
   (if (not= ?value ?user-value)
-    (insert! (->Result false 'not_march))
+    (insert! (->Result false (get-config :not-match-msg)))
     (exec/schedule! 100
       #(db/update! models/Sms ?id :status 1))))
 
