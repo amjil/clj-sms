@@ -8,4 +8,4 @@
     [clj-sms.config :refer [env]]))
 
 (defn get-blocked [phone]
-  (db/select models/Blocked :phone phone :status 1))
+  (db/select models/Block :phone phone :status 1))

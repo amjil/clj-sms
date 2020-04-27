@@ -69,12 +69,12 @@
 
    ["/check"
     {:post {:summary "check user sms."
-            :parameters {:body {:phone string? :value string?}}
+            :parameters {:body {:phone string? :code string?}}
             :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
-            :handler (fn [{{{:keys [phone value]} :body} :parameters}]
+            :handler (fn [{{{:keys [phone code]} :body} :parameters}]
                        {:status 200
                         :body
-                        (let [rule-session (sms-check/run-rules phone value)
+                        (let [rule-session (sms-check/run-rules phone code)
                               errors (map #(-> % :?errors :msg) (sms-check/run-query rule-session))]
                           (if (empty? errors)
                             {:code 0 :msg "success"}
