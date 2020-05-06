@@ -7,7 +7,6 @@
                  [cheshire "5.10.0"]
                  [clojure.java-time "0.3.2"]
                  [com.carouselapps/to-jdbc-uri "0.5.0"]
-                 [com.cerner/clara-rules "0.20.0"]
                  [cprop "0.1.16"]
                  [expound "0.8.4"]
                  [funcool/cuerdas "2020.03.26-3"]

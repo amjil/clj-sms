@@ -1,7 +1,5 @@
 (ns clj-sms.services.sms-db-check
   (:require
-    [clara.rules :refer [defrule defquery mk-session query insert insert! fire-rules]]
-    [clara.rules.accumulators :as acc]
     [toucan.db :as db]
     [honeysql.core :as sql]
     [clj-sms.db.models :as models]
@@ -9,44 +7,20 @@
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
     [promesa.exec :as exec]
-    [cuerdas.core :as str]))
-
-(defrecord Record [id value])
-
-(defrecord Sms [id value])
-
-(defrecord Result [status msg])
+    [cuerdas.core :as str]
+    [clj-sms.middleware.exception :as exception]))
 
 (defn- get-config [id]
   (-> env :sms-check (get id)))
 
-(defrule get-record
-  [Record (= ?id id)]
-  =>
+(defn check [mobile code]
   (let [date (time/minus (time/local-date-time) (time/seconds (-> env :sms-check :valid-time)))
-        data (first (db/select models/Sms :phone ?id, :status 0, :created_at [:> date], {:limit 1 :order-by [[:created_at :desc]]}))]
+        data (first (db/select models/Sms :phone mobile, :status 0, :created_at [:> date], {:limit 1 :order-by [[:created_at :desc]]}))]
+
     (if (empty? data)
-      (insert! (->Result false (get-config :no-record-msg)))
-      (insert! (->Sms (-> data :id) (-> data :sms))))))
+      (throw (ex-info "check" {:type ::exception/check :msg (get-config :no-record-msg)})))
 
-(defrule check
-  [Record (= ?user-value value)]
-  [Sms (= ?value value) (= ?id id)]
-  ; [:test (not= ?value ?user-value)]
-  =>
-  (if (not= ?value ?user-value)
-    (insert! (->Result false (get-config :not-match-msg)))
-    (exec/schedule! 100
-      #(db/update! models/Sms ?id :status 1))))
+    (if (not= code (:sms data))
+      (throw (ex-info "check" {:type ::exception/check :msg (get-config :not-match-msg)})))
 
-(defquery query-errors
-  [:?status]
-  [?errors <- Result (= ?status status)])
-
-(defn run-query [session]
-  (query session query-errors :?status false))
-
-(defn run-rules [phone sms]
-  (-> (mk-session 'clj-sms.services.sms-db-check)
-      (insert (->Record phone sms))
-      (fire-rules)))
+    (db/update! models/Sms (:id data) :status 1)))

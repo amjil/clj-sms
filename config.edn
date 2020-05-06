@@ -13,7 +13,8 @@
              :not-match-msg "短信验证码不匹配"
              :minute-check-msg "两分钟内只能发送~(-> env :sms-check :minute)条短信"
              :hour-check-msg "一个小时内只能发送~(-> env :sms-check :hour)条短信"
-             :day-check-msg "一天内只能发送~(-> env :sms-check :day)条短信"}
+             :day-check-msg "一天内只能发送~(-> env :sms-check :day)条短信"
+             :blocked-msg "blocked!!!"}
 
  :third-party {:dysms {:key "xxxxxx" :secret "xxxxxx"
                        :sign-name "阿里云通信" :sms-template "SMS_xxxxxx"}}}

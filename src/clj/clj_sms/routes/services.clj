@@ -59,23 +59,15 @@
             :parameters {:body {:phone string? (ds/opt :code) string?}}
             :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
             :handler (fn [{{{:keys [phone code]} :body} :parameters}]
+                       (sms-send/send phone code)
                        {:status 200
-                        :body
-                        (let [rule-session (sms-send/run-rules phone code)
-                              errors (map #(-> % :?errors :msg) (sms-send/run-query rule-session))]
-                          (if (empty? errors)
-                            {:code 0 :msg "success"}
-                            {:code 1 :msg (str (first errors)) :errors errors}))})}}]
+                        :body {:code 0 :msg "success"}})}}]
 
    ["/check"
     {:post {:summary "check user sms."
             :parameters {:body {:phone string? :code string?}}
             :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
             :handler (fn [{{{:keys [phone code]} :body} :parameters}]
+                       (sms-check/check phone code)
                        {:status 200
-                        :body
-                        (let [rule-session (sms-check/run-rules phone code)
-                              errors (map #(-> % :?errors :msg) (sms-check/run-query rule-session))]
-                          (if (empty? errors)
-                            {:code 0 :msg "success"}
-                            {:code 1 :msg (str (first errors)) :errors errors}))})}}]])
+                        :body {:code 0 :msg "success"}})}}]])
