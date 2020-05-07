@@ -3,7 +3,6 @@
     [clojure.tools.logging :as log]
     [clj-sms.config :refer [env]]
     [mount.core :refer [defstate]]
-    [clj-sms.util.redis :as redis]
     [clojure.set :refer [rename-keys]]
     [hikari-cp.core :refer [make-datasource]]
     [to-jdbc-uri.core :refer [to-jdbc-uri]]
@@ -47,12 +46,6 @@
   [conn pool-spec]
   (disconnect! conn)
   (connect! pool-spec))
-
-(defstate rdb
-  :start
-  (if-let [redis-url (env :redis-url)]
-    (redis/init {:url redis-url})
-    (redis/init)))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
