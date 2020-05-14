@@ -14,11 +14,16 @@
 
 (add-tap (bound-fn* clojure.pprint/pprint))
 
-(defn start []
-  (mount/start))
+(defn start
+  "Starts application.
+  You'll usually want to run this on startup."
+  []
+  (mount/start-without #'clj-sms.core/repl-server))
 
-(defn stop []
-  (mount/stop))
+(defn stop
+  "Stops application."
+  []
+  (mount/stop-except #'clj-sms.core/repl-server))
 
 (defn restart
   "Restarts application."
