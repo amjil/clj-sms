@@ -3,6 +3,7 @@
     [clj-sms.handler :as handler]
     [luminus.http-server :as http]
     [clj-sms.config :refer [env]]
+    [clj-sms.nrepl :as nrepl]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount]
@@ -29,6 +30,15 @@
         (update :port #(or (-> env :options :port) %))))
   :stop
   (http/stop http-server))
+
+(mount/defstate ^{:on-reload :noop} repl-server
+  :start
+  (when (env :nrepl-port)
+    (nrepl/start {:bind (env :nrepl-bind)
+                  :port (env :nrepl-port)}))
+  :stop
+  (when repl-server
+    (nrepl/stop repl-server)))
 
 (defn stop-app []
   (doseq [component (:stopped (mount/stop))]
