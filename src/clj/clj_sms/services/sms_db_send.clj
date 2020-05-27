@@ -15,7 +15,7 @@
 
 (defn- get-format-msg [x y]
   (let [num-value (-> env :sms-check (get y))]
-    (str/format (-> env :sms-check (get x)) {:num num-value})))
+    (str/format (-> env :sms-check (get x)) num-value)))
 
 (defn send [phone code]
 

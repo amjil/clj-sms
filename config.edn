@@ -4,7 +4,7 @@
 
 {:dev true
  :port 3000
- 
+
  :nrepl-port 7000
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :database-url "postgresql://localhost/clj_sms_dev?user=amjil&password="
@@ -13,9 +13,9 @@
              :block-list false
              :no-record-msg "短信验证码不匹配"
              :not-match-msg "短信验证码不匹配"
-             :minute-check-msg "两分钟内只能发送~(-> env :sms-check :minute)条短信"
-             :hour-check-msg "一个小时内只能发送~(-> env :sms-check :hour)条短信"
-             :day-check-msg "一天内只能发送~(-> env :sms-check :day)条短信"
+             :minute-check-msg "两分钟内只能发送%s条短信"
+             :hour-check-msg "一个小时内只能发送%s条短信"
+             :day-check-msg "一天内只能发送%s条短信"
              :blocked-msg "blocked!!!"}
 
  :third-party {:dysms {:key "xxxxxx" :secret "xxxxxx"
