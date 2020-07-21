@@ -70,4 +70,16 @@
             :handler (fn [{{{:keys [phone code]} :body} :parameters}]
                        (sms-check/check phone code)
                        {:status 200
-                        :body {:code 0 :msg "success"}})}}]])
+                        :body {:code 0 :msg "success"}})}}]
+
+   ["/get/:phone"
+    {:get {:summary "get phone code."
+              :parameters {:path {:phone string?}}
+              :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
+                                                              , (ds/opt :data) any?}}}
+              :handler (fn [{{{:keys [phone]} :path} :parameters}]
+                         (let [code (sms-check/phone-code phone)]
+                           {:status 200
+                            :body
+                            {:code 0 :msg "success"
+                             :data code}}))}}]])

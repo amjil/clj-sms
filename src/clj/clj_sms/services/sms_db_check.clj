@@ -24,3 +24,17 @@
       (throw (ex-info "check" {:type ::exception/check :msg (get-config :not-match-msg)})))
 
     (db/update! models/Sms (:id data) :status 1)))
+
+
+(defn phone-code [phone]
+  (if (true? (:dev env))
+
+    (let [date (time/minus (time/local-date-time) (time/seconds (-> env :sms-check :valid-time)))
+          data (first (db/select models/Sms :phone phone, :status 0, :created_at [:> date], {:limit 1 :order-by [[:created_at :desc]]}))]
+
+      (if (empty? data)
+        (throw (ex-info "check" {:type ::exception/check :msg (get-config :no-record-msg)})))
+
+      (:sms data))
+
+    (throw (ex-info "check" {:type ::exception/check :msg "错误！！"}))))
