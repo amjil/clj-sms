@@ -14,7 +14,8 @@
     [spec-tools.data-spec :as ds]
 
     [clj-sms.services.sms-db-send :as sms-send]
-    [clj-sms.services.sms-db-check :as sms-check]))
+    [clj-sms.services.sms-db-check :as sms-check]
+    [clj-sms.services.blacklist :as block]))
 
 (defn service-routes []
   ["/api"
@@ -82,4 +83,31 @@
                            {:status 200
                             :body
                             {:code 0 :msg "success"
-                             :data code}}))}}]])
+                             :data code}}))}}]
+
+   ["/block/:phone"
+    {:get {:summary "check phone block."
+              :parameters {:path {:phone string?}}
+              :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
+                                                              , (ds/opt :data) any?}}}
+              :handler (fn [{{{:keys [phone]} :path} :parameters}]
+                         (let [data (block/get-block phone)]
+                           {:status 200 :body {:code 0 :msg "success" :data data}}))}
+
+     :delete {:summary "delete phone from block."
+              :parameters {:path {:phone string?}}
+              :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
+                                                              , (ds/opt :data) any?}}}
+              :handler (fn [{{{:keys [phone]} :path} :parameters}]
+                         (block/delete-block phone)
+                         {:status 200 :body {:code 0 :msg "success"}})}}]
+
+
+   ["/block"
+    {:post {:summary "add phone to block."
+              :parameters {:body {:phone string? :reason string?}}
+              :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
+                                                              , (ds/opt :data) any?}}}
+              :handler (fn [{{{:keys [phone reason]} :body} :parameters}]
+                         (block/add-block phone reason)
+                         {:status 200 :body {:code 0 :msg "success"}})}}]])
