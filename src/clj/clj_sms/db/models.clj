@@ -7,3 +7,5 @@
   ;   {:status :keyword}))
 
 (defmodel Block :user_black_list)
+
+(defmodel Session :session_log)

@@ -16,7 +16,8 @@
              :minute-check-msg "两分钟内只能发送%s条短信"
              :hour-check-msg "一个小时内只能发送%s条短信"
              :day-check-msg "一天内只能发送%s条短信"
-             :blocked-msg "blocked!!!"}
+             :blocked-msg "blocked!!!"
+             :session-frq-msg "你当前发送短信过于频繁！"}
 
  :third-party {:dysms {:key "xxxxxx" :secret "xxxxxx"
                        :sign-name "阿里云通信" :sms-template "SMS_xxxxxx"}}}
