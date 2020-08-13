@@ -23,13 +23,13 @@
   (if (true? (-> env :sms-check :block-list))
     (let [data (first (db/select models/Block :phone phone :status 1))]
       (if-not (empty? data)
-        (throw (ex-info "check" {:type ::exception/check :msg (-> env :sms-check :blocked-msg)}))))
+        (throw (ex-info "check" {:type ::exception/check :msg (-> env :sms-check :blocked-msg)})))))
 
     ;; check session frequency
-    (let [date (time/minus (time/local-date-time) (time/minutes 1))
-          data (db/select models/Session :uuid uuid :created_at [:> date])]
-      (if-not (> (count data) 1)
-        (throw (ex-info "check" {:type ::exception/check :msg (-> env :sms-check :session-frq-msg)})))))
+    ; (let [date (time/minus (time/local-date-time) (time/minutes 1))
+    ;       data (db/select models/Session :uuid uuid :created_at [:> date])]
+    ;   (if-not (> (count data) 1)
+    ;     (throw (ex-info "check" {:type ::exception/check :msg (-> env :sms-check :session-frq-msg)})))))
 
 
   (let [date (time/local-date)
@@ -61,8 +61,8 @@
   (let [code (generate-code/generate)]
     (db/insert! models/Sms :phone phone, :sms code)
 
-    ;; insert session frequency 
-    (db/insert! models/Session :uuid uuid)
+    ;; insert session frequency
+    ; (db/insert! models/Session :uuid uuid)
 
     ;; send third party
     (if-not (true? (:dev env))
