@@ -17,8 +17,7 @@
   (let [num-value (-> env :sms-check (get y))]
     (str/format (-> env :sms-check (get x)) num-value)))
 
-(defn send [phone uuid]
-
+(defn before-send [phone]
   ;; check if blocked
   (if (true? (-> env :sms-check :block-list))
     (let [data (first (db/select models/Block :phone phone :status 1))]
@@ -55,7 +54,11 @@
 
     ;; check minute send day
     (if (>= (count data) (-> env :sms-check :day))
-      (throw (ex-info "check" {:type ::exception/check :msg (get-format-msg :hour-check-msg :day)}))))
+      (throw (ex-info "check" {:type ::exception/check :msg (get-format-msg :hour-check-msg :day)})))))
+
+(defn send [phone ex]
+
+  (before-send phone)
 
   ;; insert db row
   (let [code (generate-code/generate)]
@@ -65,5 +68,6 @@
     ; (db/insert! models/Session :uuid uuid)
 
     ;; send third party
+    ;; (sendapi/sendsms (merge ex {:phone phone :code code}))))
     (if-not (true? (:dev env))
-      (sendapi/sendsms {:phone phone :code code}))))
+      (sendapi/sendsms (merge ex {:phone phone :code code})))))
