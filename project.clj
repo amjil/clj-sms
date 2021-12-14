@@ -3,32 +3,32 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
-                 [cheshire "5.10.0"]
-                 [clojure.java-time "0.3.2"]
-                 [cprop "0.1.16"]
-                 [expound "0.8.4"]
-                 [funcool/cuerdas "2020.03.26-3"]
-                 [funcool/promesa "5.1.0"]
+  :dependencies [[ch.qos.logback/logback-classic "1.2.8"]
+                 [cheshire "5.10.1"]
+                 [clojure.java-time "0.3.3"]
+                 [cprop "0.1.19"]
+                 [expound "0.8.10"]
+                 [funcool/cuerdas "2021.05.29-0"]
+                 [funcool/promesa "6.0.2"]
                  [funcool/struct "1.4.0"]
-                 [hikari-cp "2.12.0"]
-                 [luminus-http-kit "0.1.6"]
-                 [luminus-migrations "0.6.7"]
-                 [luminus-transit "0.1.2"]
-                 [metosin/muuntaja "0.6.7"]
-                 [metosin/reitit "0.4.2"]
-                 [metosin/ring-http-response "0.9.1"]
+                 [hikari-cp "2.13.0"]
+                 [luminus-http-kit "0.1.9"]
+                 [luminus-migrations "0.7.1"]
+                 [luminus-transit "0.1.3"]
+                 [metosin/muuntaja "0.6.8"]
+                 [metosin/reitit "0.5.15"]
+                 [metosin/ring-http-response "0.9.3"]
                  [mount "0.1.16"]
-                 [nrepl "0.7.0"]
-                 [org.clojure/clojure "1.10.1"]
-                 [org.clojure/tools.cli "1.0.194"]
-                 [org.clojure/tools.logging "1.1.0"]
-                 [org.postgresql/postgresql "42.2.11"]
-                 [ring/ring-core "1.8.1"]
+                 [nrepl "0.9.0"]
+                 [org.clojure/clojure "1.10.3"]
+                 [org.clojure/tools.cli "1.0.206"]
+                 [org.clojure/tools.logging "1.2.1"]
+                 [org.postgresql/postgresql "42.3.1"]
+                 [ring/ring-core "1.9.4"]
                  [ring/ring-defaults "0.3.2"]
-                 [toucan "1.15.1"]
+                 [toucan "1.16.0"]
                  ;; 阿里大鱼
-                 [com.aliyun/aliyun-java-sdk-core "4.5.1"]
+                 [com.aliyun/aliyun-java-sdk-core "4.5.30"]
                  [com.aliyun/aliyun-java-sdk-dysmsapi "2.1.0"]]
 
 
@@ -41,7 +41,7 @@
   :target-path "target/%s/"
   :main ^:skip-aot clj-sms.core
 
-  :plugins [[lein-ancient "0.6.15"]]
+  :plugins [[lein-ancient "0.7.0"]]
 
   :profiles
   {:uberjar {:omit-source true
@@ -54,12 +54,12 @@
    :test          [:project/dev :project/test :profiles/test]
 
    :project/dev  {:jvm-opts ["-Dconf=dev-config.edn"]
-                  :dependencies [[pjstadig/humane-test-output "0.10.0"]
-                                 [prone "2020-01-17"]
+                  :dependencies [[pjstadig/humane-test-output "0.11.0"]
+                                 [prone "2021-04-23"]
                                  [ring/ring-devel "1.8.1"]
                                  [ring/ring-mock "0.4.0"]]
-                  :plugins      [[com.jakemccrary/lein-test-refresh "0.24.1"]
-                                 [jonase/eastwood "0.3.5"]]
+                  :plugins      [[com.jakemccrary/lein-test-refresh "0.25.0"]
+                                 [jonase/eastwood "1.0.0"]]
 
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]
