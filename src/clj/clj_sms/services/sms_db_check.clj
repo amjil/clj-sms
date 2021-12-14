@@ -1,7 +1,8 @@
 (ns clj-sms.services.sms-db-check
   (:require
-    [toucan.db :as db]
-    [honeysql.core :as sql]
+    [clj-sms.db.core :refer [*db*]]
+    [next.jdbc.sql :as sql]
+    [honeysql.core :as hsql]
     [clj-sms.db.models :as models]
     [java-time :as time]
     [clojure.tools.logging :as log]
@@ -33,7 +34,7 @@
           data (first (db/select models/Sms :phone phone, :status 0, :created_at [:> date], {:limit 1 :order-by [[:created_at :desc]]}))]
 
       (if (empty? data)
-        (throw (ex-info "check" {:type ::exception/check :msg (get-config :no-record-msg)})))
+        (throw (ex-info "check" {:type ::exception/check :msg :no-record})))
 
       (:sms data))
 

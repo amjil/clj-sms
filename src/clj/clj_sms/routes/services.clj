@@ -57,7 +57,7 @@
 
    ["/send"
     {:post {:summary "check user sms."
-            :parameters {:body {:phone string? (ds/opt :code) string? :type string? (ds/opt :amount) string?}}
+            :parameters {:body {:phone string? (ds/opt :code) string?}}
             :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?}}}
             :handler (fn [{{{:keys [phone] :as params} :body} :parameters}]
                        (sms-send/send phone params)
@@ -73,6 +73,7 @@
                        {:status 200
                         :body {:code 0 :msg "success"}})}}]
 
+   ;; test get phone sms code
    ["/get/:phone"
     {:get {:summary "get phone code."
               :parameters {:path {:phone string?}}
