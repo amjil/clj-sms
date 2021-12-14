@@ -2,6 +2,7 @@
 
 Clojure开发的短信验证码服务，特点是配置化，短信发送限制，黑名单功能
 
+只有不验证短信的情况重复发送会触发限发规则
 
 ## 使用方法
 `git clone https://gitee.com/amjil/clj-sms`

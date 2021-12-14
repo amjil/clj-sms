@@ -15,7 +15,8 @@
 
     [clj-sms.services.sms-db-send :as sms-send]
     [clj-sms.services.sms-db-check :as sms-check]
-    [clj-sms.services.blacklist :as block]))
+    [clj-sms.services.blacklist :as block]
+    [clj-sms.config :refer [env]]))
 
 (defn service-routes []
   ["/api"
@@ -73,18 +74,19 @@
                        {:status 200
                         :body {:code 0 :msg "success"}})}}]
 
-   ;; test get phone sms code
-   ["/get/:phone"
-    {:get {:summary "get phone code."
-              :parameters {:path {:phone string?}}
-              :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
-                                                              , (ds/opt :data) any?}}}
-              :handler (fn [{{{:keys [phone]} :path} :parameters}]
-                         (let [code (sms-check/phone-code phone)]
-                           {:status 200
-                            :body
-                            {:code 0 :msg "success"
-                             :data code}}))}}]
+   ;; test get phone sms code, only in dev mode
+   (if (:dev env)
+     ["/get/:phone"
+      {:get {:summary "get phone code."
+                :parameters {:path {:phone string?}}
+                :responses {200 {:body {:code int? :msg string?, (ds/opt :errors) any?
+                                                                , (ds/opt :data) any?}}}
+                :handler (fn [{{{:keys [phone]} :path} :parameters}]
+                           (let [code (sms-check/phone-code phone)]
+                             {:status 200
+                              :body
+                              {:code 0 :msg "success"
+                               :data code}}))}}])
 
    ["/block/:phone"
     {:get {:summary "check phone block."
