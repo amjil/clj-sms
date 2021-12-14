@@ -40,24 +40,3 @@
       (catch ClientException e
         (.printStackTrace e))))
   (log/warn "dysmsapi sendsms ....... ended"))
-
-(defn send-params [params]
-  (log/warn "send-sms params " params)
-  (condp = (:type params)
-    "onlinepay2" (-> params
-                     (assoc :sms-template "SMS_213770692")
-                     (assoc :code (:code params))
-                     (clojure.set/rename-keys {:code :vefiry}))
-    "onlinepay1" (-> params (assoc :sms-template "SMS_189030084"))))
-
-(comment
-
-  (-> {:foo :bar} (assoc :a 1))
-  (send-params {:phone "15248141905" :type "onlinepay2" :code "359821" :amount "43.81"})
-  (->
-   (send-params {:phone "15248141905" :type "onlinepay2" :code "359821" :amount "43.81"})
-   send-sms)
-  (prn "")
-
-  (user/stop)
-  (user/start))

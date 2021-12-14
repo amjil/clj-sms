@@ -1,8 +1,7 @@
 (ns clj-sms.services.sms-db-check
   (:require
-    [clj-sms.db.core :refer [*db*]]
-    [next.jdbc.sql :as sql]
-    [honeysql.core :as hsql]
+    [toucan.db :as db]
+    [honeysql.core :as sql]
     [clj-sms.db.models :as models]
     [java-time :as time]
     [clojure.tools.logging :as log]
@@ -38,4 +37,4 @@
 
       (:sms data))
 
-    (throw (ex-info "check" {:type ::exception/check :msg "错误！！"}))))
+    (throw (ex-info "check" {:type ::exception/check :msg "error!"}))))
