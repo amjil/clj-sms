@@ -6,6 +6,7 @@
   :dependencies [[ch.qos.logback/logback-classic "1.2.8"]
                  [cheshire "5.10.1"]
                  [clojure.java-time "0.3.3"]
+                 [com.carouselapps/to-jdbc-uri "0.5.0"]
                  [cprop "0.1.19"]
                  [expound "0.8.10"]
                  [funcool/cuerdas "2021.05.29-0"]
